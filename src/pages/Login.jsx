@@ -134,15 +134,7 @@ function Login() {
           <Link to="/">← بازگشت به خانه</Link>
         </p>
 
-        {/* اطلاعات تست */}
-        <div className="auth-hint">
-          <strong>🔑 اطلاعات تست:</strong>
-          <div>👑 ادمین: admin@fitclub.ir / admin123</div>
-          <div>👨‍🏫 مربی: ali@fitclub.ir / trainer123</div>
-          <div>👤 کاربر: user@fitclub.ir / user123</div>
-        </div>
-      </motion.div>
-    </div>
+      
   )
 }
 
