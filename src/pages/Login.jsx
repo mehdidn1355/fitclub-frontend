@@ -21,7 +21,6 @@ function Login() {
     if (mode === 'login') {
       const result = await login(email, password)
       if (result.success) {
-        // بر اساس نقش کاربر هدایت کن
         if (result.user.role === 'admin') navigate('/admin')
         else if (result.user.role === 'trainer') navigate('/trainer')
         else navigate('/')
@@ -133,8 +132,8 @@ function Login() {
         <p className="auth-footer">
           <Link to="/">← بازگشت به خانه</Link>
         </p>
-
-      
+      </motion.div>
+    </div>
   )
 }
 
