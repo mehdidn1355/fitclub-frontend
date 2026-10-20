@@ -1,87 +1,53 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { authAPI } from '../api/endpoints'
+import { createContext, useState, useContext, useEffect } from 'react'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem('fitclub-user')
-      return stored ? JSON.parse(stored) : null
-    } catch {
-      return null
-    }
-  })
-  const [loading, setLoading] = useState(false)
+  const [user, setUser] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const login = async (email, password) => {
-    setLoading(true)
-    try {
-      const { data } = await authAPI.login({ email, password })
-      localStorage.setItem('fitclub-token', data.access_token)
-      localStorage.setItem('fitclub-user', JSON.stringify(data.user))
-      setUser(data.user)
-      return { success: true, user: data.user }
-    } catch (err) {
-      return {
-        success: false,
-        error: err.response?.data?.detail || 'خطا در ورود',
+  // خواندن اطلاعات از localStorage هنگام لود سایت
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    const savedUser = localStorage.getItem('user')
+    
+    if (token && savedUser) {
+      try {
+        setUser(JSON.parse(savedUser))
+        setIsAuthenticated(true)
+      } catch (e) {
+        console.error("Error parsing user data", e)
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
       }
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
+  }, [])
+
+  // تابع ورود
+  const login = (userData, token) => {
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(userData))
+    setUser(userData)
+    setIsAuthenticated(true)
   }
 
-  const register = async (payload) => {
-    setLoading(true)
-    try {
-      const { data } = await authAPI.register(payload)
-      localStorage.setItem('fitclub-token', data.access_token)
-      localStorage.setItem('fitclub-user', JSON.stringify(data.user))
-      setUser(data.user)
-      return { success: true, user: data.user }
-    } catch (err) {
-      return {
-        success: false,
-        error: err.response?.data?.detail || 'خطا در ثبت‌نام',
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
-
+  // تابع خروج
   const logout = () => {
-    localStorage.removeItem('fitclub-token')
-    localStorage.removeItem('fitclub-user')
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
     setUser(null)
+    setIsAuthenticated(false)
+    // هدایت به صفحه اصلی یا لاگین پس از خروج
+    window.location.href = '/login' 
   }
-
-  const isAuthenticated = !!user
-  const isAdmin = user?.role === 'admin'
-  const isTrainer = user?.role === 'trainer' || isAdmin
-  const isCustomer = user?.role === 'customer'
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        login,
-        register,
-        logout,
-        isAuthenticated,
-        isAdmin,
-        isTrainer,
-        isCustomer,
-      }}
-    >
-      {children}
+    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout }}>
+      {!loading && children}
     </AuthContext.Provider>
   )
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth باید داخل AuthProvider استفاده بشه')
-  return ctx
-}
+export const useAuth = () => useContext(AuthContext)

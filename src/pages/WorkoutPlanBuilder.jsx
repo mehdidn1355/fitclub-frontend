@@ -7,11 +7,16 @@ import ExerciseAnimator3D from '../components/three/ExerciseAnimator3D'
 
 const days = ['روز ۱', 'روز ۲', 'روز ۳', 'روز ۴', 'روز ۵', 'روز ۶', 'روز ۷']
 
+const equipmentLabels = {
+  none: 'بدون وسیله',
+  basic: 'وسایل ساده',
+  full: 'وسایل کامل',
+}
+
 function WorkoutPlanBuilder() {
   const { planId } = useParams()
   const navigate = useNavigate()
 
-  // ============ State ============
   const [plan, setPlan] = useState(null)
   const [exercises, setExercises] = useState([])
   const [bodyParts, setBodyParts] = useState([])
@@ -26,11 +31,10 @@ function WorkoutPlanBuilder() {
 
   const toFa = (n) => Number(n || 0).toLocaleString('fa-IR')
 
-  // ============ دریافت اطلاعات ============
+  // دریافت اطلاعات
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
-      setError(null)
       try {
         const [planRes, exRes, partsRes] = await Promise.all([
           plansAPI.get(planId),
@@ -41,7 +45,6 @@ function WorkoutPlanBuilder() {
         setExercises(exRes.data)
         setBodyParts(['همه', ...partsRes.data])
 
-        // اگه قبلاً items داشت
         if (planRes.data.items && planRes.data.items.length > 0) {
           setItems(
             planRes.data.items.map((it) => ({
@@ -50,6 +53,7 @@ function WorkoutPlanBuilder() {
               exercise_icon: it.exercise?.icon || '🏋️',
               animation_key: it.exercise?.animation_key || 'default',
               muscle_group: it.exercise?.muscle_group || 'default',
+              equipment_needed: it.exercise?.equipment_needed || 'none',
               day: it.day,
               order: it.order,
               sets: it.sets,
@@ -70,7 +74,7 @@ function WorkoutPlanBuilder() {
     fetchData()
   }, [planId])
 
-  // ============ فیلترها ============
+  // فیلترها
   const filteredExercises =
     activeBodyPart === 'همه'
       ? exercises
@@ -80,7 +84,7 @@ function WorkoutPlanBuilder() {
     .filter((it) => it.day === selectedDay)
     .sort((a, b) => a.order - b.order)
 
-  // ============ عملیات ============
+  // عملیات
   const addExercise = (exercise) => {
     const nextOrder = currentDayItems.length + 1
     setItems([
@@ -91,6 +95,7 @@ function WorkoutPlanBuilder() {
         exercise_icon: exercise.icon,
         animation_key: exercise.animation_key,
         muscle_group: exercise.muscle_group,
+        equipment_needed: exercise.equipment_needed || 'none',
         day: selectedDay,
         order: nextOrder,
         sets: exercise.default_sets || 3,
@@ -106,7 +111,6 @@ function WorkoutPlanBuilder() {
     const itemToRemove = currentDayItems[index]
     const filtered = items.filter((it) => it !== itemToRemove)
 
-    // بازچینش order
     const dayItems = filtered
       .filter((x) => x.day === selectedDay)
       .sort((a, b) => a.order - b.order)
@@ -152,10 +156,7 @@ function WorkoutPlanBuilder() {
 
       await plansAPI.updateItems(planId, itemsPayload)
       setSuccess(true)
-
-      setTimeout(() => {
-        navigate('/trainer/requests')
-      }, 1500)
+      setTimeout(() => navigate('/trainer/requests'), 1500)
     } catch (err) {
       console.error(err)
       setError(err.response?.data?.detail || 'خطا در ذخیره')
@@ -164,7 +165,6 @@ function WorkoutPlanBuilder() {
     }
   }
 
-  // ============ Loading ============
   if (loading) {
     return (
       <div className="courses-page">
@@ -194,7 +194,6 @@ function WorkoutPlanBuilder() {
     )
   }
 
-  // ============ Success Screen ============
   if (success) {
     return (
       <div className="courses-page">
@@ -227,7 +226,6 @@ function WorkoutPlanBuilder() {
   return (
     <div className="courses-page">
       <main className="courses-main">
-        {/* ===== Header ===== */}
         <div className="courses-intro">
           <Link to="/trainer/requests" className="view-all-link">
             ← بازگشت به درخواست‌ها
@@ -241,7 +239,7 @@ function WorkoutPlanBuilder() {
         </div>
 
         <div className="builder-layout">
-          {/* ===== Sidebar - Days ===== */}
+          {/* Sidebar */}
           <div className="builder-sidebar">
             <h3>روزهای تمرین</h3>
             {days.map((day) => {
@@ -249,9 +247,7 @@ function WorkoutPlanBuilder() {
               return (
                 <button
                   key={day}
-                  className={`builder-day ${
-                    selectedDay === day ? 'active' : ''
-                  }`}
+                  className={`builder-day ${selectedDay === day ? 'active' : ''}`}
                   onClick={() => setSelectedDay(day)}
                 >
                   <span>{day}</span>
@@ -265,18 +261,15 @@ function WorkoutPlanBuilder() {
             </div>
           </div>
 
-          {/* ===== Main ===== */}
+          {/* Main */}
           <div className="builder-main">
             <h3>{selectedDay}</h3>
 
-            {/* Body Parts Filter */}
             <div className="muscle-groups">
               {bodyParts.map((part) => (
                 <button
                   key={part}
-                  className={`muscle-btn ${
-                    activeBodyPart === part ? 'active' : ''
-                  }`}
+                  className={`muscle-btn ${activeBodyPart === part ? 'active' : ''}`}
                   onClick={() => setActiveBodyPart(part)}
                 >
                   {part}
@@ -284,7 +277,6 @@ function WorkoutPlanBuilder() {
               ))}
             </div>
 
-            {/* Exercise Suggestions */}
             <div className="exercise-suggestions">
               <span className="suggestions-label">
                 حرکات پیشنهادی (کلیک کن تا اضافه شه):
@@ -308,7 +300,6 @@ function WorkoutPlanBuilder() {
               </div>
             </div>
 
-            {/* Current Items */}
             <div className="builder-exercises">
               <AnimatePresence>
                 {currentDayItems.length === 0 ? (
@@ -325,7 +316,6 @@ function WorkoutPlanBuilder() {
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ duration: 0.3 }}
                     >
-                      {/* 🎬 آیکون سه‌بعدی + دکمه */}
                       <div
                         className="exercise-3d-wrapper"
                         onClick={() => setActiveExercise(item)}
@@ -340,18 +330,23 @@ function WorkoutPlanBuilder() {
 
                       <span className="exercise-num">{toFa(i + 1)}</span>
 
-                      <strong className="exercise-name">
-                        {item.exercise_icon} {item.exercise_name}
-                      </strong>
+                      <div className="exercise-info-block">
+                        <strong className="exercise-name">
+                          {item.exercise_icon} {item.exercise_name}
+                        </strong>
+                        {item.equipment_needed && item.equipment_needed !== 'none' && (
+                          <span className="exercise-equipment">
+                            🛠 {equipmentLabels[item.equipment_needed] || item.equipment_needed}
+                          </span>
+                        )}
+                      </div>
 
                       <div className="exercise-field">
                         <label>ست</label>
                         <input
                           type="number"
                           value={item.sets}
-                          onChange={(e) =>
-                            updateItem(i, 'sets', e.target.value)
-                          }
+                          onChange={(e) => updateItem(i, 'sets', e.target.value)}
                           min="1"
                         />
                       </div>
@@ -361,9 +356,7 @@ function WorkoutPlanBuilder() {
                         <input
                           type="number"
                           value={item.reps}
-                          onChange={(e) =>
-                            updateItem(i, 'reps', e.target.value)
-                          }
+                          onChange={(e) => updateItem(i, 'reps', e.target.value)}
                           min="1"
                         />
                       </div>
@@ -373,9 +366,7 @@ function WorkoutPlanBuilder() {
                         <input
                           type="number"
                           value={item.weight}
-                          onChange={(e) =>
-                            updateItem(i, 'weight', e.target.value)
-                          }
+                          onChange={(e) => updateItem(i, 'weight', e.target.value)}
                           min="0"
                         />
                       </div>
@@ -385,9 +376,7 @@ function WorkoutPlanBuilder() {
                         <input
                           type="number"
                           value={item.rest_seconds}
-                          onChange={(e) =>
-                            updateItem(i, 'rest_seconds', e.target.value)
-                          }
+                          onChange={(e) => updateItem(i, 'rest_seconds', e.target.value)}
                           min="0"
                         />
                       </div>
@@ -423,7 +412,6 @@ function WorkoutPlanBuilder() {
         </div>
       </main>
 
-      {/* 🎬 Modal سه‌بعدی */}
       {activeExercise && (
         <ExerciseAnimator3D
           animationKey={activeExercise.animation_key || 'default'}

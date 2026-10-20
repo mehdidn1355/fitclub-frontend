@@ -7646,3 +7646,28 @@ button {
     gap: 8px;
   }
 }
+/* ===== Exercise Equipment Badge ===== */
+.exercise-equipment {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 10px;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 12px;
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ===== Exercise Info Block ===== */
+.exercise-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.exercise-info-block .exercise-name {
+  font-size: 14px;
+  color: #f5f5f5;
+}

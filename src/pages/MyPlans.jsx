@@ -18,7 +18,7 @@ const playlistData = {
 const locationLabels = { home: 'خانه', gym: 'باشگاه' }
 const typeLabels = { online: 'آنلاین', in_person: 'حضوری' }
 const equipmentLabels = {
-  none: 'بدون وسایل',
+  none: 'بدون وسیله',
   basic: 'وسایل ساده',
   full: 'وسایل کامل',
 }
@@ -39,13 +39,12 @@ function MyPlans() {
   const [nutrition, setNutrition] = useState(null)
   const [suggestedProducts, setSuggestedProducts] = useState([])
   const [activeExercise, setActiveExercise] = useState(null)
-  const [activeTab, setActiveTab] = useState('workout') // 'workout' | 'nutrition'
+  const [activeTab, setActiveTab] = useState('workout')
   const [loading, setLoading] = useState(true)
   const [addedIds, setAddedIds] = useState([])
 
   const toFa = (n) => Number(n || 0).toLocaleString('fa-IR')
 
-  // دریافت همه‌ی برنامه‌ها
   useEffect(() => {
     const fetchPlans = async () => {
       setLoading(true)
@@ -68,7 +67,6 @@ function MyPlans() {
     fetchPlans()
   }, [planId])
 
-  // دریافت برنامه‌ی غذایی + محصولات پیشنهادی
   useEffect(() => {
     const fetchNutrition = async () => {
       if (!activePlan) return
@@ -135,9 +133,14 @@ function MyPlans() {
             <div className="empty-cart-icon">🎯</div>
             <h1>هنوز برنامه‌ای نداری!</h1>
             <p>با ساخت درخواست، اولین برنامه‌ت رو بگیر.</p>
-            <Link to="/ai-trainer" className="primary-button">
-              ساخت برنامه با مربی هوشمند
-            </Link>
+            <div className="empty-cart-actions">
+              <Link to="/ai-trainer" className="primary-button">
+                🤖 درخواست از مربی
+              </Link>
+              <Link to="/generate-workout" className="secondary-button">
+                🎯 ساخت برنامه رایگان
+              </Link>
+            </div>
           </div>
         </main>
       </div>
@@ -159,7 +162,6 @@ function MyPlans() {
           <p>{toFa(plans.length)} برنامه موجود</p>
         </div>
 
-        {/* Tabs (برنامه‌ها) */}
         <div className="plans-tabs">
           {plans.map((plan) => (
             <button
@@ -183,7 +185,6 @@ function MyPlans() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Info Grid */}
             <div className="plan-info-grid">
               <div className="plan-info-card">
                 <span className="plan-info-icon">🎯</span>
@@ -217,7 +218,6 @@ function MyPlans() {
               </div>
             </div>
 
-            {/* Music Player */}
             {playlist && (
               <div
                 className="music-player-card"
@@ -232,7 +232,6 @@ function MyPlans() {
               </div>
             )}
 
-            {/* Section Tabs */}
             <div className="content-tabs">
               <button
                 className={`content-tab ${activeTab === 'workout' ? 'active' : ''}`}
@@ -256,7 +255,6 @@ function MyPlans() {
               </button>
             </div>
 
-            {/* ===== Workout Tab ===== */}
             {activeTab === 'workout' && (
               <div className="plan-exercises">
                 {activePlan.items?.length === 0 ? (
@@ -283,6 +281,14 @@ function MyPlans() {
                           <span>
                             {item.day} • {toFa(item.sets)} ست × {toFa(item.reps)} تکرار
                           </span>
+                          {item.exercise?.equipment_needed &&
+                            item.exercise.equipment_needed !== 'none' && (
+                              <span className="exercise-equipment">
+                                🛠{' '}
+                                {equipmentLabels[item.exercise.equipment_needed] ||
+                                  item.exercise.equipment_needed}
+                              </span>
+                            )}
                         </div>
                         <button
                           className="exercise-row-play"
@@ -298,7 +304,6 @@ function MyPlans() {
               </div>
             )}
 
-            {/* ===== Nutrition Tab ===== */}
             {activeTab === 'nutrition' && (
               <div className="plan-nutrition">
                 {!nutrition ? (
@@ -308,7 +313,6 @@ function MyPlans() {
                   </div>
                 ) : (
                   <>
-                    {/* Nutrition Stats */}
                     <div className="nutrition-stats-grid">
                       <div className="nutrition-stat">
                         <span>🔥</span>
@@ -337,7 +341,6 @@ function MyPlans() {
                       </div>
                     </div>
 
-                    {/* Meals */}
                     <div className="nutrition-section">
                       <h3 className="nutrition-section-title">
                         <span className="title-bar" />
@@ -369,7 +372,6 @@ function MyPlans() {
                       </div>
                     </div>
 
-                    {/* Supplements */}
                     {nutrition.supplements?.length > 0 && (
                       <div className="nutrition-section">
                         <h3 className="nutrition-section-title">
@@ -401,16 +403,13 @@ function MyPlans() {
                       </div>
                     )}
 
-                    {/* Notes */}
                     {nutrition.notes && (
                       <div className="nutrition-section">
                         <h3 className="nutrition-section-title">
                           <span className="title-bar" />
                           📝 یادداشت مربی
                         </h3>
-                        <div className="nutrition-notes">
-                          {nutrition.notes}
-                        </div>
+                        <div className="nutrition-notes">{nutrition.notes}</div>
                       </div>
                     )}
                   </>
@@ -418,7 +417,6 @@ function MyPlans() {
               </div>
             )}
 
-            {/* Suggested Products */}
             {suggestedProducts.length > 0 && (
               <div className="plan-products">
                 <h2 className="panel-title">
@@ -461,7 +459,6 @@ function MyPlans() {
         )}
       </main>
 
-      {/* 3D Modal */}
       {activeExercise && (
         <ExerciseAnimator3D
           animationKey={activeExercise.exercise?.animation_key || 'default'}

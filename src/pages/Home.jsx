@@ -23,7 +23,6 @@ const item = {
 function Home() {
   return (
     <>
-      {/* ===== Hero ===== */}
       <section className="hero-section">
         <motion.div
           className="hero-content"
@@ -47,8 +46,8 @@ function Home() {
           </motion.p>
 
           <motion.div className="hero-actions" variants={item}>
-            <Link to="/ai-trainer" className="primary-button">
-              🎯 شروع با مربی AI
+            <Link to="/generate-workout" className="primary-button">
+              🎯 ساخت برنامه رایگان
             </Link>
             <Link to="/courses" className="secondary-button">
               مشاهده دوره‌ها
@@ -87,10 +86,8 @@ function Home() {
         </motion.div>
       </section>
 
-      {/* ===== Marquee ===== */}
       <MarqueeBrands />
 
-      {/* ===== Services ===== */}
       <section className="services">
         <div className="section-heading">
           <motion.span
@@ -116,10 +113,17 @@ function Home() {
           {[
             {
               icon: '🎯',
-              title: 'مربی هوش مصنوعی',
-              text: 'برنامه‌ی تمرینی اختصاصی با انیمیشن سه‌بعدی و موسیقی دلخواه',
+              title: 'برنامه‌ساز هوشمند',
+              text: 'برنامه‌ی تمرینی اختصاصی، رایگان و در چند ثانیه',
+              link: '/generate-workout',
+              cta: 'ساخت برنامه',
+            },
+            {
+              icon: '🤖',
+              title: 'مربی AI',
+              text: 'برنامه‌ی اختصاصی با انیمیشن سه‌بعدی و موسیقی دلخواه',
               link: '/ai-trainer',
-              cta: 'شروع کن',
+              cta: 'درخواست',
             },
             {
               icon: '👨‍🏫',
@@ -161,13 +165,10 @@ function Home() {
         </div>
       </section>
 
-      {/* ===== Showcase 3D ===== */}
       <ShowcaseSection />
 
-      {/* ===== Testimonials ===== */}
       <Testimonials />
 
-      {/* ===== CTA ===== */}
       <CtaSection />
     </>
   )
